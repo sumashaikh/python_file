@@ -1,0 +1,268 @@
+# Import necessary modules
+from django.db import models
+
+# Define the Student model
+class Student(models.Model):
+    # Fields of the Student model
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    date_of_birth = models.DateField()
+    email = models.EmailField()
+    address = models.TextField()
+
+    # String representation of the model
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
+
+
+*******************
+python manage.py makemigrations
+python manage.py migrate
+
+**********************************
+# Import the Student model
+from .models import Student
+from django.contrib import admin
+
+# Register the Student model
+admin.site.register(Student)
+
+**************************
+step:2
+Start Django Shell:
+
+********************************************************
+
+step3:
+Import and Create a Student Instance:
+new_student = Student(first_name='John', last_name='Doe', date_of_birth='2000-01-01', email='john.doe@example.com', address='123 Main St, City, Country')
+new_student.save()
+*****************************************************
+step4:
+Import and Create Multiple Student Instances:
+student_data = [
+    {'first_name': 'John', 'last_name': 'Doe', 'date_of_birth': '2000-01-01', 'email': 'john.doe@example.com', 
+     'address': '123 Main St, City, Country'},
+    {'first_name': 'Jane', 'last_name': 'Smith', 'date_of_birth': '1998-05-15', 'email': 'jane.smith@example.com', 
+     'address': '456 Park Ave, City, Country'},
+    # Add more students as needed
+]
+
+# Create and save each student instance
+for data in student_data:
+    student = Student(**data)
+    student.save()
+
+***********************************************************
+
+step5:
+Once you are in the Django shell, import your Student model and query for the data you want to delete.
+ Here’s an example:
+
+
+# Query for students to delete (example: all students with first_name 'John')
+students_to_delete = Student.objects.filter(first_name='John')
+
+# Print the students to be deleted
+print("Students to delete:")
+for student in students_to_delete:
+    print(student)
+
+# Delete the students
+students_to_delete.delete()
+
+
+****************************************************************************
+Read (Select/Retrieve):
+# Query all students
+all_students = Student.objects.all()
+
+# Query a single student by primary key
+student = Student.objects.get(pk=1)
+
+# Filter students based on conditions
+filtered_students = Student.objects.filter(last_name='Doe')
+
+# Get the first student matching the filter
+first_student = Student.objects.filter(last_name='Doe').first()
+
+***********************************************************************
+Update:
+
+Updating Objects: You can update existing objects in the database.
+
+# Retrieve an object to update
+student = Student.objects.get(pk=1)
+
+# Update fields and save the object
+student.first_name = 'Jane'
+student.save()
+
+*****************************************************************
+Aggregation:
+
+Aggregating Data: You can perform aggregation functions such as count(), sum(), avg(), etc., 
+to retrieve aggregated data from your models.
+
+
+ex:
+from django.db.models import Count, Sum
+num_students = Student.objects.count()
+# Sum of all student ages
+total_age = Student.objects.aggregate(total_age=Sum('age'))
+
+# Grouping and counting students by a field
+students_by_gender = Student.objects.values('gender').annotate(num_students=Count('id'))
+
+************************************************************
+
+Transactions:
+
+Handling Transactions: You can perform operations within a transaction to ensure atomicity and consistency.
+
+from django.db import transaction
+
+try:
+    with transaction.atomic():
+        # Perform multiple database operations
+        student1 = Student.objects.create(first_name='John', last_name='Doe')
+        student2 = Student.objects.create(first_name='Jane', last_name='Smith')
+        # Other operations...
+except Exception as e:
+    # Handle exceptions
+    print(f"Error: {e}")
+
+
+*************************************************
+
+1. Filtering with Q objects and OR conditions
+You can use Q objects to perform complex lookups with OR conditions:
+
+from django.db.models import Q
+# Retrieve students with last name 'Doe' or first name 'Jane'
+students = Student.objects.filter(Q(last_name='Doe') | Q(first_name='Jane'))
+
+
+********************************************
+
+2. Aggregating and annotating data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**********************************************
+
+from django.http import HttpResponse
+
+def blog_list(request):
+    # Example data
+    blogs = [
+        {'title': 'First Blog', 'content': 'Content of the first blog post.'},
+        {'title': 'Second Blog', 'content': 'Content of the second blog post.'},
+        # Add more blog entries as needed
+    ]
+    
+    greeting = "Welcome to our Blog Page!"  # Example of another variable
+
+    # Construct the response content
+    response_content = f"<h1>{greeting}</h1>"
+    response_content += "<ul>"
+    for blog in blogs:
+        response_content += f"<li><h2>{blog['title']}</h2><p>{blog['content']}</p></li>"
+    response_content += "</ul>"
+
+    # Return an HTTP response
+    return HttpResponse(response_content)
+
+
+***************************************************
+def blog_list(request):
+    # Define blog entries
+    blog1 = {'title': 'First Blog', 'content': 'Content of the first blog post.'}
+    blog2 = {'title': 'Second Blog', 'content': 'Content of the second blog post.'}
+    
+    greeting = "Welcome to our Blog Page!"  # Example of another variable
+
+    # Construct the response content
+    response_content = f"<h1>{greeting}</h1>"
+    response_content += f"<h2>{blog1['title']}</h2><p>{blog1['content']}</p>"
+    response_content += f"<br><h2>{blog2['title']}</h2><p>{blog2['content']}</p>"
+
+    # Return an HTTP response
+    return HttpResponse(response_content)
+
+
+****************************
+from .models import Student
+
+@admin.register(Student)
+
+************************************
+What is the purpose of the handle_value_error decorator in the provided Python code?
+
+1] Imagine you have a function greet that prints a message, but you want to ensure that every message printed is in uppercase letters. How could you use a decorator in Python to achieve this without modifying the original function?
+2] Q: How can I make a chain of function decorators in Python?
+
+*************************************************************
+
+admin.py
+from .models import Student
+
+
+
+*******************
+fetch data models to front
+views.py
+# views.py
+from django.shortcuts import render
+from .models import Student
+
+def student_list(request):
+    students = Student.objects.all()  # Fetch all student records
+    return render(request, 'student_list.html', {'students': students})
+
+
+***********************
+# urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('students/', views.student_list, name='student_list'),
+]
+****************************
+Templates
+
+<!-- student_list.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student List</title>
+</head>
+<body>
+    <h1>Student List</h1>
+    <ul>
+        {% for student in students %}
+            <li>{{ student.first_name }} {{ student.last_name }} (Enrolled on: {{ student.enrollment_date }})</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+**********************
+
+
+
+@admin.register(Student)
